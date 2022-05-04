@@ -45,9 +45,9 @@ public class Controller {
                 this.decryption(null);
                 System.out.println("Расшифровано, посмотрите файл в папке 'resources'");
             } else if (command == 4) {
+
                 System.out.println("Привет");
             } else if (command == 5) {
-                this.test();
             } else if (command == 0) {
                 System.out.println("Выход");
                 break;
