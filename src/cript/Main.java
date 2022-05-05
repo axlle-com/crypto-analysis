@@ -1,7 +1,6 @@
 package cript;
 
 import cript.controller.Controller;
-
 import java.io.IOException;
 
 public class Main {

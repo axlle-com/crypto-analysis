@@ -10,8 +10,9 @@ public class Base {
     private final ArrayList<Character> tableCharRu;
     private final ArrayList<Character> tableCharEn;
     public HashMap<Character, Double> standardFrequencyRu;
-    public HashMap<Character, Double> standardFrequencyEn;
+    public HashMap<Double, Double> frequencyRu;
     public HashMap<Character, Double> currentFrequencyRu;
+    public HashMap<Character, Double> standardFrequencyEn;
     public HashMap<Character, Double> currentFrequencyEn;
     private int shift;
     private String mod;
@@ -79,6 +80,42 @@ public class Base {
 
     public HashMap<Character, Double> getCurrentFrequencyRu() {
         return currentFrequencyRu;
+    }
+
+    public Base setCurrentFrequencyRu(File in) {
+        int cnt = 0;
+        try (
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(in));
+        ) {
+            int symbol = bufferedReader.read();
+            while (symbol != -1) {
+                char ch = (char) symbol;
+                if (this.standardFrequencyRu.get(ch) != null) {
+                    if (this.currentFrequencyRu.get(ch) != null) {
+                        Double value = 1.0;
+                        value += this.currentFrequencyRu.get(ch);
+                        this.currentFrequencyRu.put(ch, value);
+                    } else {
+                        this.currentFrequencyRu.put(ch, 1.0);
+                    }
+                    cnt++;
+                }
+                symbol = bufferedReader.read();
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        if (this.currentFrequencyRu.size() > 0) {
+            HashMap<Character, Double> temp = this.currentFrequencyRu;
+            for (Map.Entry<Character, Double> entry : temp.entrySet()) {
+                Character key = entry.getKey();
+                Double value = entry.getValue();
+                value = (value / cnt) * 100;
+                value = Math.round(value * 1000.0) / 1000.0;
+                this.currentFrequencyRu.put(key, value);
+            }
+        }
+        return this;
     }
 
     public void setTableChar() {
@@ -176,38 +213,81 @@ public class Base {
         }
     }
 
-    public void setCurrentFrequencyRu(File in, String to, boolean isEncode) {
-        int cnt = 0;
+    public ArrayList<Character> getArrayChar(File in) {
+        ArrayList<Character> arrayList = new ArrayList<>();
         try (
                 BufferedReader bufferedReader = new BufferedReader(new FileReader(in));
-                FileWriter writer = new FileWriter(to);
         ) {
             int symbol = bufferedReader.read();
             while (symbol != -1) {
                 char ch = (char) symbol;
-                if (this.standardFrequencyRu.get(ch) != null) {
-                    if (this.currentFrequencyRu.get(ch) != null) {
-                        Double value = 1.0;
-                        value += this.currentFrequencyRu.get(ch);
-                        this.currentFrequencyRu.put(ch, value);
-                    } else {
-                        this.currentFrequencyRu.put(ch, 1.0);
-                    }
-                    cnt++;
-                }
+                arrayList.add(ch);
                 symbol = bufferedReader.read();
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        if (this.currentFrequencyRu.size() > 0) {
-            HashMap<Character, Double> temp = this.currentFrequencyRu;
-            for (Map.Entry<Character, Double> entry : temp.entrySet()) {
-                Character key = entry.getKey();
-                Double value = entry.getValue();
-                value = (value / cnt) * 100;
-                this.currentFrequencyRu.put(key, value);
+        return arrayList;
+    }
+
+    public void setBruteForceFile(File in, String to) {
+        ArrayList<Character> arrayList = this.getArrayChar(in);
+        int size = this.tableCharRu.size();
+        String temp;
+        for (int i = 0; i < size; i++) {
+            temp = to + "_" + i + ".txt";
+            try (
+                    FileWriter writer = new FileWriter(temp);
+            ) {
+                this.setShift(i);
+                arrayList.forEach((n) -> {
+                    Character newCh = this.getCharacterForDecryption(n);
+                    if (newCh != null) {
+                        try {
+                            writer.append(newCh);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
             }
         }
+    }
+
+    public void compare() {
+        double diff = 0.2;
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        for (Map.Entry<Character, Double> standard : standardFrequencyRu.entrySet()) {
+            Character keyStandard = standard.getKey();
+            Double valueStandard = standard.getValue();
+            for (Map.Entry<Character, Double> current : currentFrequencyRu.entrySet()) {
+                Character keyCurrent = current.getKey();
+                Double valueCurrent = current.getValue();
+                if (valueCurrent >= (valueStandard - diff) && valueCurrent <= (valueStandard + diff)) {
+                    arrayList.add((this.tableCharRu.indexOf(keyCurrent) - this.tableCharRu.indexOf(keyStandard)));
+                }
+            }
+        }
+        Collections.sort(arrayList);
+        int size = arrayList.size();
+        int count = 0;
+        int max = count;
+        int shift = 0;
+        for (int i = 1; i < size; i++) {
+            if (arrayList.get(i - 1) == arrayList.get(i)) {
+                count++;
+            } else {
+                if (count > max) {
+                    max = count;
+                    shift = arrayList.get(i - 1);
+                }
+                count = 0;
+            }
+        }
+        System.out.println("***********************************************");
+        System.out.println("* Сдвиг равен :" + shift);
+        System.out.println("***********************************************");
     }
 }

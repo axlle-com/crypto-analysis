@@ -1,8 +1,8 @@
 package cript.controller;
 
 import cript.model.Base;
-
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Controller {
@@ -20,8 +20,8 @@ public class Controller {
         System.out.println("1 - Установить сдвиг");
         System.out.println("2 - Зашифровать");
         System.out.println("3 - Расшифровать");
-        System.out.println("4 - Пусто");
-        System.out.println("5 - Тест");
+        System.out.println("4 - Частотный анализ");
+        System.out.println("5 - Взлом Брут Форсом");
         System.out.println("0 - Выход");
     }
 
@@ -45,10 +45,13 @@ public class Controller {
                 this.decryption(null);
                 System.out.println("Расшифровано, посмотрите файл в папке 'resources'");
             } else if (command == 4) {
-
-                System.out.println("Привет");
+                this.setCurrentFrequency(null);
+                System.out.println("Готово");
             } else if (command == 5) {
+                this.bruteForce(null);
+                System.out.println("Расшифровано, посмотрите файлы в папке 'resources'");
             } else if (command == 0) {
+
                 System.out.println("Выход");
                 break;
             } else {
@@ -59,48 +62,44 @@ public class Controller {
 
     public void decryption(String path) {
         if (path == null) {
-            path = this.base.getDir() + "/resources/encryption.txt";
+            path = this.base.getDir() + "encryption.txt";
         }
         File file = new File(path);
         if (file.isFile()) {
-            String uniqueName = this.base.getDir() + "/resources/decryption.txt";//System.currentTimeMillis()
+            String uniqueName = this.base.getDir() + "decryption.txt";//System.currentTimeMillis()
             this.base.converter(file, uniqueName, false);
         }
     }
 
     public void encryption(String path) {
         if (path == null) {
-            path = this.base.getDir() + "/resources/test.txt";
+            path = this.base.getDir() + "test.txt";
         }
         File file = new File(path);
         if (file.isFile()) {
-            String uniqueName = this.base.getDir() + "/resources/encryption.txt";//System.currentTimeMillis()
+            String uniqueName = this.base.getDir() + "encryption.txt";//System.currentTimeMillis()
             this.base.converter(file, uniqueName, true);
         }
     }
 
-    public void test() throws IOException {
-        File file = new File(this.base.getDir() + "/resources/test.txt");
+    public void bruteForce(String path){
+        if (path == null) {
+            path = this.base.getDir() + "encryption.txt";
+        }
+        File file = new File(path);
         if (file.isFile()) {
-            String uniqueName = this.base.getDir() + "/resources/test_" + System.currentTimeMillis() + ".txt";
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-            FileWriter writer = new FileWriter(uniqueName);
-            int symbol = bufferedReader.read();
-            while (symbol != -1) {
-                char ch = (char) symbol;
-                ch = Character.toLowerCase(ch);
-                int indexOf = this.base.getTableChar().indexOf(ch);
-                if (indexOf != -1) {
-                    char newChar = this.base.getTableChar().get(indexOf);
-                    System.out.print(newChar);
-                    writer.append(newChar);
-                }
-                symbol = bufferedReader.read();
-            }
-            System.out.println();
-            writer.flush();
-            writer.close();
-            bufferedReader.close();
+            String uniqueName = this.base.getDir() + "decryption";
+            this.base.setBruteForceFile(file, uniqueName);
+        }
+    }
+
+    public void setCurrentFrequency(String path) {
+        if (path == null) {
+            path = this.base.getDir() + "encryption.txt";
+        }
+        File file = new File(path);
+        if (file.isFile()) {
+            this.base.setCurrentFrequencyRu(file).compare();
         }
     }
 
