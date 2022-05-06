@@ -1,8 +1,8 @@
 package cript.controller;
 
 import cript.model.Base;
-import java.io.*;
-import java.util.ArrayList;
+
+import java.io.File;
 import java.util.Scanner;
 
 public class Controller {
@@ -25,25 +25,32 @@ public class Controller {
         System.out.println("0 - Выход");
     }
 
-    public void route() throws IOException {
+    public void route() {
         while (true) {
             Controller.printMenu();
             int command = getCommand();
+            String stringCommand = null;
             if (command == 1) {
-                int count = this.base.getTableChar().size() - 1;
-                System.out.println("Введите сдвиг, но не больше " + count + " и не меньше -" + count);
+                System.out.println("Введите сдвиг");
                 int ch = getCommand();
-                if (this.base.setShift(ch)) {
-                    System.out.println("Сдвиг установлен");
-                } else {
-                    System.out.println("Произошла ошибка, сдвиг не установлен"); //TODO Реализовать повтор
-                }
+                this.base.setShift(ch);
+                System.out.println("Сдвиг установлен");
             } else if (command == 2) {
-                this.encryption(null);
-                System.out.println("Зашифровано, посмотрите файл в папке 'resources'");
+                System.out.println("Введите адрес исходного текста относительно папки 'resources' -> `test.txt`");
+                stringCommand = getStringCommand();
+                if (this.encryption(stringCommand)) {
+                    System.out.println("Зашифровано, посмотрите файл в папке 'resources'");
+                } else {
+                    System.out.println("Произошла ошибка, файл не найден");
+                }
             } else if (command == 3) {
-                this.decryption(null);
-                System.out.println("Расшифровано, посмотрите файл в папке 'resources'");
+                System.out.println("Введите адрес зашифрованного текста относительно папки 'resources' -> `encryption.txt`");
+                stringCommand = getStringCommand();
+                if (this.decryption(stringCommand)) {
+                    System.out.println("Расшифровано, посмотрите файл в папке 'resources'");
+                } else {
+                    System.out.println("Произошла ошибка, файл не найден");
+                }
             } else if (command == 4) {
                 this.setCurrentFrequency(null);
                 System.out.println("Готово");
@@ -51,7 +58,6 @@ public class Controller {
                 this.bruteForce(null);
                 System.out.println("Расшифровано, посмотрите файлы в папке 'resources'");
             } else if (command == 0) {
-
                 System.out.println("Выход");
                 break;
             } else {
@@ -60,29 +66,33 @@ public class Controller {
         }
     }
 
-    public void decryption(String path) {
+    public boolean decryption(String path) {
         if (path == null) {
             path = this.base.getDir() + "encryption.txt";
         }
-        File file = new File(path);
+        File file = new File(this.base.getDir() + "/" + path);
         if (file.isFile()) {
             String uniqueName = this.base.getDir() + "decryption.txt";//System.currentTimeMillis()
             this.base.converter(file, uniqueName, false);
+            return true;
         }
+        return false;
     }
 
-    public void encryption(String path) {
+    public boolean encryption(String path) {
         if (path == null) {
             path = this.base.getDir() + "test.txt";
         }
-        File file = new File(path);
+        File file = new File(this.base.getDir() + "/" + path);
         if (file.isFile()) {
             String uniqueName = this.base.getDir() + "encryption.txt";//System.currentTimeMillis()
             this.base.converter(file, uniqueName, true);
+            return true;
         }
+        return false;
     }
 
-    public void bruteForce(String path){
+    public void bruteForce(String path) {
         if (path == null) {
             path = this.base.getDir() + "encryption.txt";
         }
@@ -108,6 +118,17 @@ public class Controller {
         int command = Integer.MAX_VALUE;
         try {
             command = scanner.nextInt();
+        } catch (Exception e) {
+            scanner.next();
+        }
+        return command;
+    }
+
+    private String getStringCommand() {
+        Scanner scanner = new Scanner(System.in);
+        String command = null;
+        try {
+            command = scanner.nextLine();
         } catch (Exception e) {
             scanner.next();
         }

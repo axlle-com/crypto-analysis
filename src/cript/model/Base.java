@@ -138,18 +138,18 @@ public class Base {
         return shift;
     }
 
-    public boolean setShift(int shift) {
+    public void setShift(int shift) {
         int shiftLimit = 0;
         if (this.mod.equals("Ru")) {
             shiftLimit = this.tableCharRu.size() - 1;
         } else {
             shiftLimit = this.tableCharEn.size() - 1;
         }
+
         if (Math.abs(shift) > shiftLimit) {
-            return false;
+            shift = Math.abs(shift) % shiftLimit;
         }
         this.shift = shift;
-        return true;
     }
 
     public String getMod() {
