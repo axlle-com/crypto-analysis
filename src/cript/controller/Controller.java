@@ -55,8 +55,13 @@ public class Controller {
                 this.setCurrentFrequency(null);
                 System.out.println("Готово");
             } else if (command == 5) {
-                this.bruteForce(null);
-                System.out.println("Расшифровано, посмотрите файлы в папке 'resources'");
+                System.out.println("Введите адрес зашифрованного текста относительно папки 'resources' -> `encryption.txt`");
+                stringCommand = getStringCommand();
+                if (this.bruteForce(stringCommand)) {
+                    System.out.println("Расшифровано, посмотрите файл в папке 'resources'");
+                } else {
+                    System.out.println("Произошла ошибка, файл не найден");
+                }
             } else if (command == 0) {
                 System.out.println("Выход");
                 break;
@@ -92,7 +97,7 @@ public class Controller {
         return false;
     }
 
-    public void bruteForce(String path) {
+    public boolean bruteForce(String path) {
         if (path == null) {
             path = this.base.getDir() + "encryption.txt";
         }
@@ -100,7 +105,9 @@ public class Controller {
         if (file.isFile()) {
             String uniqueName = this.base.getDir() + "decryption";
             this.base.setBruteForceFile(file, uniqueName);
+            return true;
         }
+        return false;
     }
 
     public void setCurrentFrequency(String path) {
